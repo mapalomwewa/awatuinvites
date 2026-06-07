@@ -2026,6 +2026,8 @@ _sb.from('profiles').select('*').eq('id', session.user.id).single()
 } catch(e) {
   console.warn('[Awatu] Init error:', e.message);
 }
+// If user is logged in, show logged-in state in nav
+if(currentUser) updateSidebarUser();
 setTimeout(()=>{checkInviteHash();checkAdminHash();}, 400);
 })();
 function openNewPasswordModal(){
@@ -3776,7 +3778,7 @@ currentUser={id:data.user.id,name:name||email.split('@')[0],email};
 _sb.from('profiles').upsert({id:data.user.id,name:name||email.split('@')[0],email}).catch(()=>{});
 updateSidebarUser();closeAuth();
 showToast('Welcome, '+(name||email.split('@')[0])+'! 🎉','success');
-setTimeout(()=>{if(authAfterEvent)openEventForm({startAt:'design'});else openDash();},400);
+setTimeout(()=>{if(authAfterEvent)openEventForm({startAt:'design'});else openDash();},800);
 }else{
 showToast('Check your email to confirm your account!','success');closeAuth();
 }
@@ -3789,7 +3791,7 @@ console.log('[Awatu] Login success');
 currentUser={id:data.user.id,name:email.split('@')[0],email:data.user.email||email};
 updateSidebarUser();closeAuth();
 showToast('Welcome back!','success');
-setTimeout(()=>{if(authAfterEvent)openEventForm({startAt:'design'});else openDash();},400);
+setTimeout(()=>{if(authAfterEvent)openEventForm({startAt:'design'});else openDash();},800);
 // Fetch profile in background and update if found
 _sb.from('profiles').select('*').eq('id',data.user.id).single()
 .then(({data:profile})=>{
@@ -4048,7 +4050,7 @@ rb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:#9
 }
 }
 async function openDash(){
-if(!currentUser){openAuth(false);return;}
+if(!currentUser){console.warn("[Awatu] openDash: no user, skipping redirect");return;}
 const ov=document.getElementById('dashOverlay');if(!ov)return;
 const u=currentUser,hr=new Date().getHours();
 const dg=$('dashGreeting');if(dg)dg.textContent=(hr<12?'Good morning, ':hr<17?'Good afternoon, ':'Good evening, ')+u.name+' ✦';
